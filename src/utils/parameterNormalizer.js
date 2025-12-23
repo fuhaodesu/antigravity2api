@@ -160,12 +160,20 @@ export function toGenerationConfig(normalized, enableThinking, actualModelName) 
     }
   }
 
+  let maxOutputTokens = normalized.max_tokens || normalized.max_completion_tokens;
+  if (actualEnableThinking && thinkingBudget > 0) {
+    const minOutputTokens = thinkingBudget + 1;
+    if (!maxOutputTokens || maxOutputTokens < minOutputTokens) {
+      maxOutputTokens = minOutputTokens;
+    }
+  }
+
   const generationConfig = {
     topP: normalized.top_p,
     topK: normalized.top_k,
     temperature: normalized.temperature,
     candidateCount: 1,
-    maxOutputTokens: normalized.max_tokens || normalized.max_completion_tokens,
+    maxOutputTokens: maxOutputTokens,
     thinkingConfig: {
       includeThoughts: actualEnableThinking,
       thinkingBudget: thinkingBudget
