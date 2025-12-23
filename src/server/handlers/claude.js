@@ -116,6 +116,14 @@ export const handleClaudeRequest = async (req, res, isStream) => {
       return res.status(400).json(buildClaudeErrorPayload({ message: 'messages is required' }, 400));
     }
     
+    logger.info('[Claude] 转发前请求参数', {
+      model,
+      max_tokens: rawParams.max_tokens,
+      thinking_budget: rawParams.thinking_budget,
+      thinking: rawParams.thinking,
+      reasoning_effort: rawParams.reasoning_effort
+    });
+
     const token = await tokenManager.getToken();
     if (!token) {
       throw new Error('没有可用的token，请运行 npm run login 获取token');
@@ -130,6 +138,12 @@ export const handleClaudeRequest = async (req, res, isStream) => {
     if (isImageModel) {
       prepareImageRequest(requestBody);
     }
+
+    logger.info('[Claude] 转发后请求参数', {
+      model: requestBody.model,
+      maxOutputTokens: requestBody?.request?.generationConfig?.maxOutputTokens,
+      thinkingConfig: requestBody?.request?.generationConfig?.thinkingConfig
+    });
     
     const msgId = `msg_${Date.now()}`;
     const maxRetries = Number(config.retryTimes || 0);
